@@ -98,16 +98,22 @@ def find_users():
             ).dict()
     ) 
 
-@app.get('/pessoas/<int:id>')
-# @spec.validate(resp=Response(HTTP_200=Pessoa))
+@app.get('/user/<int:id>')
+@spec.validate(resp=Response(HTTP_200=Users))
 def busca_pessoa(id):
-    '''Retorna pessoa dado o id'''
+    '''Retorn user by given id'''
     try:
-        pessoa = database.search(Query().id == id)[0]
-        user = User.query.filter_by(username = session['username']).all()
+        user = User.query.filter_by(id = id).all()
     except IndexError:
-        return {'message': 'Pessoa not found'}, 404
-    return jsonify(pessoa)
+        return {'message': 'User not found'}, 404
+    print(user[0])
+    list_users = user
+    return jsonify(
+            Users(
+                users= list_users,
+                count= len(list_users)
+            ).dict()
+    ) 
 
 
 @app.post('/pessoas')
