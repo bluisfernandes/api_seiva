@@ -73,6 +73,12 @@ class Users(BaseModel):
     users: list[User_pydantic]
     count: int
 
+class NewUser(BaseModel):
+    username: str
+    password: str
+    group: Optional[str]
+    email: str
+
 
 migrate = Migrate(app, db)
 
@@ -116,13 +122,25 @@ def busca_pessoa(id):
     ) 
 
 
-@app.post('/pessoas')
-@spec.validate(body=Request(User_pydantic), resp=Response(HTTP_201=User_pydantic))
-def insere_pessoa():
-    '''Insere uma pessoa no banco de dados'''
-    person = request.context.body.dict()
-    database.insert(person)
-    return person
+def add_in_db(table, dict):
+    # user = table(username=dict['username'], id=dict['id'], password=dict['password'], group=dict['group'], email=dict['email'])
+    user = table(**dict)
+    db.session.add(user)
+    db.session.commit()
+    # to appear all features in __dict__:
+    user.id
+    return user
+
+
+@app.post('/user')
+# @spec.validate(body=Request(NewUser))
+@spec.validate(body=Request(NewUser), resp=Response(HTTP_201=User_pydantic))
+def insert_user():
+    '''Insert a new user on database'''
+    new_user = request.context.body.dict(exclude_none=True)
+    user = add_in_db(User, new_user)
+    a = User_pydantic(**user.__dict__)
+    return jsonify(User_pydantic(**user.__dict__).dict())
 
 
 @app.put('/pessoas/<int:id>')
