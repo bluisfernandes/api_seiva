@@ -127,7 +127,6 @@ def busca_pessoa(id):
 
 
 def add_in_db(table, dict):
-    # user = table(username=dict['username'], id=dict['id'], password=dict['password'], group=dict['group'], email=dict['email'])
     user = table(**dict)
     db.session.add(user)
     db.session.commit()
@@ -137,12 +136,12 @@ def add_in_db(table, dict):
 
 
 @app.post('/user')
-@spec.validate(body=Request(NewUser), resp=Response(HTTP_201=NewUserResponse))
+@spec.validate(body=Request(NewUser))
 def insert_user():
     '''Insert a new user on database'''
     new_user = request.context.body.dict(exclude_none=True)
     user = add_in_db(User, new_user)
-    return jsonify(NewUserResponse(**user.__dict__).dict()), 200
+    return jsonify(NewUserResponse(**user.__dict__).dict()), 201
 
 
 @app.put('/pessoas/<int:id>')
