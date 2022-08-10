@@ -79,6 +79,10 @@ class NewUser(BaseModel):
     group: Optional[str]
     email: str
 
+class NewUserResponse(User_pydantic):
+    class Config:
+        fields = {'password': {'exclude': True}}
+
 
 migrate = Migrate(app, db)
 
@@ -133,14 +137,12 @@ def add_in_db(table, dict):
 
 
 @app.post('/user')
-# @spec.validate(body=Request(NewUser))
-@spec.validate(body=Request(NewUser), resp=Response(HTTP_201=User_pydantic))
+@spec.validate(body=Request(NewUser), resp=Response(HTTP_201=NewUserResponse))
 def insert_user():
     '''Insert a new user on database'''
     new_user = request.context.body.dict(exclude_none=True)
     user = add_in_db(User, new_user)
-    a = User_pydantic(**user.__dict__)
-    return jsonify(User_pydantic(**user.__dict__).dict())
+    return jsonify(NewUserResponse(**user.__dict__).dict()), 200
 
 
 @app.put('/pessoas/<int:id>')
