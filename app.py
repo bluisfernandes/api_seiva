@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, url_for
 from flask_pydantic_spec import FlaskPydanticSpec, Response, Request
 from pydantic_sqlalchemy import sqlalchemy_to_pydantic
 from pydantic import BaseModel, Field
@@ -78,7 +78,7 @@ migrate = Migrate(app, db)
 
 @app.get('/')
 def index():
-    return {'homepage':'/', 'API version': 'v1'}
+    return {'homepage':'/', 'API version': 'v1', 'swagger': url_for('doc_page_swagger')}
 
 
 @app.get('/users')
