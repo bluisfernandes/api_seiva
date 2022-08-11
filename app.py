@@ -134,6 +134,14 @@ def add_in_db(table, dict):
     user.id
     return user
 
+def update_in_db(table, id, dict):
+    user = table.query.filter_by(id=id).first()
+    for k, v in dict.items():
+        setattr(user, k, v)
+    db.session.commit()
+    user.id
+    return user
+
 
 @app.post('/user')
 @spec.validate(body=Request(NewUser))
@@ -145,12 +153,12 @@ def insert_user():
 
 
 @app.put('/pessoas/<int:id>')
-@spec.validate(body=Request(User_pydantic), resp=Response(HTTP_200=User_pydantic))
-def altera_pessoa(id):
-    '''Altera a pessoa pelo numero do id.'''
-    body = request.context.body.dict()
-    database.update(body, Query().id == id)
-    return jsonify(body)
+@spec.validate(body=Request(QueryUser))
+def update_user(id):
+    '''change user fields by user id.'''
+    changes = request.context.body.dict(exclude_none=True)
+    user = update_in_db(User, id, changes)
+    return jsonify(NewUserResponse(**user.__dict__).dict()), 200
 
 
 @app.delete('/pessoas/<int:id>')
