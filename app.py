@@ -111,7 +111,7 @@ def find_users():
 @app.get('/user/<int:id>')
 @spec.validate(resp=Response(HTTP_200=Users))
 def busca_pessoa(id):
-    '''Retorn user by given id'''
+    '''Return user by given id'''
     try:
         user = User.query.filter_by(id = id).all()
     except IndexError:
@@ -142,6 +142,11 @@ def update_in_db(table, id, dict):
     user.id
     return user
 
+def delete_in_db(table, id):
+    user = table.query.filter_by(id=id).first()
+    db.session.delete(user)
+    db.session.commit()
+
 
 @app.post('/user')
 @spec.validate(body=Request(NewUser))
@@ -164,7 +169,7 @@ def update_user(id):
 @app.delete('/pessoas/<int:id>')
 @spec.validate(resp=Response('HTTP_204'))
 def deleta_pessoa(id):
-    '''Deleta a pessoa pelo numero do id.'''
-    database.remove(Query().id == id)
+    '''Delete user by id.'''
+    delete_in_db(User, id)
     return jsonify({})
 
