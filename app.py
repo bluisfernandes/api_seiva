@@ -79,7 +79,7 @@ class NewUser(BaseModel):
     group: Optional[str]
     email: str
 
-class NewUserResponse(User_pydantic):
+class UserResponse(User_pydantic):
     class Config:
         fields = {'password': {'exclude': True}}
 
@@ -109,21 +109,13 @@ def find_users():
     ) 
 
 @app.get('/user/<int:id>')
-@spec.validate(resp=Response(HTTP_200=Users))
+# @spec.validate(resp=Response(HTTP_200=UserResponse))
 def busca_pessoa(id):
     '''Return user by given id'''
-    try:
-        user = User.query.filter_by(id = id).all()
-    except IndexError:
+    user = User.query.filter_by(id = id).first()
+    if not user:
         return {'message': 'User not found'}, 404
-    print(user[0])
-    list_users = user
-    return jsonify(
-            Users(
-                users= list_users,
-                count= len(list_users)
-            ).dict()
-    ) 
+    return jsonify(UserResponse(**user.__dict__).dict()) 
 
 
 def add_in_db(table, dict):
@@ -154,7 +146,7 @@ def insert_user():
     '''Insert a new user on database'''
     new_user = request.context.body.dict(exclude_none=True)
     user = add_in_db(User, new_user)
-    return jsonify(NewUserResponse(**user.__dict__).dict()), 201
+    return jsonify(UserResponse(**user.__dict__).dict()), 201
 
 
 @app.put('/pessoas/<int:id>')
@@ -163,7 +155,7 @@ def update_user(id):
     '''change user fields by user id.'''
     changes = request.context.body.dict(exclude_none=True)
     user = update_in_db(User, id, changes)
-    return jsonify(NewUserResponse(**user.__dict__).dict()), 200
+    return jsonify(UserResponse(**user.__dict__).dict()), 200
 
 
 @app.delete('/pessoas/<int:id>')
