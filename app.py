@@ -92,6 +92,10 @@ class Pesquisas(BaseModel):
     pesquisa: list[Pesquisa_pydantic]
     count: int
 
+class Categorias(BaseModel):
+    pesquisa: list[Categoria_pydantic]
+    count: int
+
 
 migrate = Migrate(app, db)
 
@@ -231,4 +235,16 @@ def find_pesquisas():
             ).dict()
     ) , 200
 
+
+@app.get('/categorias')
+@spec.validate(resp=Response(HTTP_200=Categorias))
+def find_gategorias():
+    '''Return a list of categorias'''
+    categorias = Categoria.query.all()
+    return jsonify(
+            Categoria(
+                categorias= categorias,
+                count= len(categorias)
+            ).dict()
+    ) , 200
 
