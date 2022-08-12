@@ -92,9 +92,15 @@ class Pesquisas(BaseModel):
     pesquisa: list[Pesquisa_pydantic]
     count: int
 
+class RequestPesquisa(BaseModel):
+    pesquisa: str
+
 class Categorias(BaseModel):
-    pesquisa: list[Categoria_pydantic]
+    categoria: list[Categoria_pydantic]
     count: int
+
+class RequestCategoria(BaseModel):
+    categoria: str
 
 
 migrate = Migrate(app, db)
@@ -136,7 +142,7 @@ def add_in_db(table, dict):
     user = table(**dict)
     db.session.add(user)
     db.session.commit()
-    create_log(table, user.id, f'add in db: {user.username}')
+    create_log(table, user.id, f'add in db: {user.__tablename__}:{user.id}')
     # to appear all features in __dict__:
     user.id
     return user
@@ -235,6 +241,13 @@ def find_pesquisas():
             ).dict()
     ) , 200
 
+@app.post('/pesquisa')
+@spec.validate(body=Request(RequestPesquisa), resp=Response(HTTP_200=Pesquisa_pydantic))
+def insert_pesquisa():
+    '''Insert a new log on database'''
+    pesquisa = request.context.body.dict(exclude_none=True)
+    new_data = add_in_db(Pesquisa, pesquisa)
+    return jsonify(Pesquisa_pydantic(**new_data.__dict__).dict()), 201
 
 @app.get('/categorias')
 @spec.validate(resp=Response(HTTP_200=Categorias))
@@ -242,9 +255,16 @@ def find_gategorias():
     '''Return a list of categorias'''
     categorias = Categoria.query.all()
     return jsonify(
-            Categoria(
-                categorias= categorias,
+            Categorias(
+                categoria= categorias,
                 count= len(categorias)
             ).dict()
     ) , 200
 
+@app.post('/categoria')
+@spec.validate(body=Request(RequestCategoria), resp=Response(HTTP_200=Categoria_pydantic))
+def insert_categoria():
+    '''Insert a new categoria on database'''
+    categoria = request.context.body.dict(exclude_none=True)
+    new_data = add_in_db(Categoria, categoria)
+    return jsonify(Categoria_pydantic(**new_data.__dict__).dict()), 201
