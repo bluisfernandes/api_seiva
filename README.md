@@ -8,7 +8,7 @@ from app import db
 db.create_all()
 ```
 
-To insert in in database
+To insert in database
 ```python
 from app import User, db
 user = User(username='foo', email='foo@bar.com', password='asd123')
@@ -17,7 +17,7 @@ deb.session.commit()
 ```
 
 To run the API \
-`flask run`
-[localhost:5000/apidoc/swagger)](localhost:5000/apidoc/swagger)
+`flask run` \
+[localhost:5000/apidoc/swagger](localhost:5000/apidoc/swagger)
 
 
