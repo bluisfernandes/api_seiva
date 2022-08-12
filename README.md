@@ -18,6 +18,6 @@ deb.session.commit()
 
 To run the API \
 `flask run` \
-[localhost:5000/apidoc/swagger](localhost:5000/apidoc/swagger)
+[localhost:5000/apidoc/swagger](http://localhost:5000/apidoc/swagger)
 
 
