@@ -165,7 +165,7 @@ def insert_user():
     return jsonify(UserResponse(**user.__dict__).dict()), 201
 
 
-@app.put('/pessoas/<int:id>')
+@app.put('/user/<int:id>')
 @spec.validate(body=Request(QueryUser))
 def update_user(id):
     '''change user fields by user id.'''
@@ -177,7 +177,7 @@ def update_user(id):
     return jsonify(UserResponse(**user.__dict__).dict()), 200
 
 
-@app.delete('/pessoas/<int:id>')
+@app.delete('/user/<int:id>')
 @spec.validate(resp=Response('HTTP_204'))
 def deleta_pessoa(id):
     '''Delete user by id.'''
