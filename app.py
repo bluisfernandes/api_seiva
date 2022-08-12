@@ -53,9 +53,10 @@ class Categoria(db.Model):
 
 class Logs(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    datetime = db.Column(db.String(20), nullable=False)
-    job = db.Column(db.String(60), nullable=False)
+    datetime = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    description = db.Column(db.String(60), nullable=False)
     area = db.Column(db.String(60), nullable=False)
+    id_ref = db.Column(db.Integer, nullable=True)
 
 User_pydantic = sqlalchemy_to_pydantic(User)
 Pesquisa_pydantic = sqlalchemy_to_pydantic(Pesquisa)
@@ -81,6 +82,10 @@ class UserResponse(User_pydantic):
 
 class Users(BaseModel):
     users: list[UserResponse]
+    count: int
+
+class Logss(BaseModel):
+    logs: list[Logs_pydantic]
     count: int
 
 
@@ -123,6 +128,7 @@ def add_in_db(table, dict):
     user = table(**dict)
     db.session.add(user)
     db.session.commit()
+    create_log(table, user.id, f'add in db: {user.username}')
     # to appear all features in __dict__:
     user.id
     return user
@@ -132,12 +138,21 @@ def update_in_db(table, id, dict):
     for k, v in dict.items():
         setattr(user, k, v)
     db.session.commit()
+    create_log(table, user.id, f'updated in db: {str(dict)}')
+    # to appear all features in __dict__:
     user.id
     return user
 
 def delete_in_db(table, id):
     user = table.query.filter_by(id=id).first()
+    create_log(table, user.id, f'deleted from db: {table.__tablename__} id:{id}')
     db.session.delete(user)
+    db.session.commit()
+
+def create_log(table, id, description):
+    '''Create a new log.'''
+    log = Logs(id_ref=id, description=description, area=table.__tablename__ )
+    db.session.add(log)
     db.session.commit()
 
 
@@ -172,3 +187,28 @@ def deleta_pessoa(id):
     delete_in_db(User, id)
     return jsonify({})
 
+@app.get('/logs')
+# @spec.validate(query=QueryUser, resp=Response(HTTP_200=Users))
+# @spec.validate(query=QueryUser)
+def find_logs():
+    '''Return logs list'''
+    # query = request.context.query
+    logs = Logs.query.all()
+    # for k, v in query.dict(exclude_none=False).items():
+        # if v != None:
+            # users = users.filter(getattr(User, k)==v)
+    return jsonify(
+            Logss(
+                logs= logs,
+                count= len(logs)
+            ).dict()
+    ) , 200
+
+
+@app.post('/logs')
+@spec.validate(body=Request(Logs_pydantic))
+def insert_log():
+    '''Insert a new log on database'''
+    new_log = request.context.body.dict(exclude_none=True)
+    log = add_in_db(Logs, new_log)
+    return jsonify(Logs_pydantic(**log.__dict__).dict()), 201
