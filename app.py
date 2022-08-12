@@ -88,6 +88,10 @@ class Logss(BaseModel):
     logs: list[Logs_pydantic]
     count: int
 
+class Pesquisas(BaseModel):
+    pesquisa: list[Pesquisa_pydantic]
+    count: int
+
 
 migrate = Migrate(app, db)
 
@@ -187,8 +191,9 @@ def deleta_pessoa(id):
     delete_in_db(User, id)
     return jsonify({})
 
+
 @app.get('/logs')
-# @spec.validate(query=QueryUser, resp=Response(HTTP_200=Users))
+@spec.validate(resp=Response(HTTP_200=Logss))
 # @spec.validate(query=QueryUser)
 def find_logs():
     '''Return logs list'''
@@ -206,9 +211,24 @@ def find_logs():
 
 
 @app.post('/logs')
-@spec.validate(body=Request(Logs_pydantic))
+@spec.validate(body=Request(Logs_pydantic), resp=Response(HTTP_200=Logs_pydantic))
 def insert_log():
     '''Insert a new log on database'''
     new_log = request.context.body.dict(exclude_none=True)
     log = add_in_db(Logs, new_log)
     return jsonify(Logs_pydantic(**log.__dict__).dict()), 201
+
+
+@app.get('/pesquisas')
+@spec.validate(resp=Response(HTTP_200=Pesquisas))
+def find_pesquisas():
+    '''Return a list os pesquisas'''
+    pesquisas = Pesquisa.query.all()
+    return jsonify(
+            Pesquisas(
+                pesquisa= pesquisas,
+                count= len(pesquisas)
+            ).dict()
+    ) , 200
+
+
