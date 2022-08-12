@@ -23,7 +23,7 @@ if not os.environ.get('DATABASE_USER_URI'):
     raise RuntimeError("DATABASE_USER_URI not set")
 
 app = Flask(__name__)
-spec = FlaskPydanticSpec('FlAsK', title='Estudo API')
+spec = FlaskPydanticSpec('FlAsK', title='API Seiva')
 spec.register(app)
 
 app.secret_key = os.getenv('SECRET_KEY', secrets.token_urlsafe())
@@ -69,10 +69,6 @@ class QueryUser(BaseModel):
     group: Optional[str]
     email: Optional[str]
 
-class Users(BaseModel):
-    users: list[User_pydantic]
-    count: int
-
 class NewUser(BaseModel):
     username: str
     password: str
@@ -83,6 +79,10 @@ class UserResponse(User_pydantic):
     class Config:
         fields = {'password': {'exclude': True}}
 
+class Users(BaseModel):
+    users: list[UserResponse]
+    count: int
+
 
 migrate = Migrate(app, db)
 
@@ -92,7 +92,8 @@ def index():
 
 
 @app.get('/users')
-@spec.validate(query=QueryUser, resp=Response(HTTP_200=Users))
+# @spec.validate(query=QueryUser, resp=Response(HTTP_200=Users))
+@spec.validate(query=QueryUser)
 def find_users():
     '''Return user list'''
     query = request.context.query
@@ -106,7 +107,7 @@ def find_users():
                 users= list_users,
                 count= len(list_users)
             ).dict()
-    ) 
+    ) , 200
 
 @app.get('/user/<int:id>')
 # @spec.validate(resp=Response(HTTP_200=UserResponse))
