@@ -154,6 +154,9 @@ def insert_user():
 @spec.validate(body=Request(QueryUser))
 def update_user(id):
     '''change user fields by user id.'''
+    user = User.query.filter_by(id=id).first()
+    if not user:
+        return {'message': 'User not found'}, 404
     changes = request.context.body.dict(exclude_none=True)
     user = update_in_db(User, id, changes)
     return jsonify(UserResponse(**user.__dict__).dict()), 200
@@ -163,6 +166,9 @@ def update_user(id):
 @spec.validate(resp=Response('HTTP_204'))
 def deleta_pessoa(id):
     '''Delete user by id.'''
+    user = User.query.filter_by(id=id).first()
+    if not user:
+        return {'message': 'User not found'}, 404
     delete_in_db(User, id)
     return jsonify({})
 
