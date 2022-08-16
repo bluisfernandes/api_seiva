@@ -1,3 +1,4 @@
+from logging import exception
 from flask import Flask, jsonify, request, url_for
 from flask_pydantic_spec import FlaskPydanticSpec, Response, Request
 from pydantic_sqlalchemy import sqlalchemy_to_pydantic
@@ -5,6 +6,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 import os
@@ -141,11 +143,16 @@ def busca_pessoa(id):
 def add_in_db(table, dict):
     user = table(**dict)
     db.session.add(user)
-    db.session.commit()
-    create_log(table, user.id, f'add in db: {user.__tablename__}:{user.id}')
-    # to appear all features in __dict__:
-    user.id
-    return user
+    try:
+        db.session.commit()
+        create_log(table, user.id, f'add in db: {user.__tablename__}:{user.id}')
+        # to appear all features in __dict__:
+        user.id
+        return user
+    except IntegrityError as e:
+        db.session.rollback()
+        print(f"ERROR! {e}")
+        return False
 
 def update_in_db(table, id, dict):
     user = table.query.filter_by(id=id).first()
@@ -176,6 +183,8 @@ def insert_user():
     '''Insert a new user on database'''
     new_user = request.context.body.dict(exclude_none=True)
     user = add_in_db(User, new_user)
+    if not user:
+        return {'message': 'User already in use'}, 404
     return jsonify(UserResponse(**user.__dict__).dict()), 201
 
 
