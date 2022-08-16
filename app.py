@@ -49,9 +49,9 @@ class Pesquisa(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     pesquisa = db.Column(db.String(40), nullable=False, unique=True)
 
-class Categoria(db.Model):
+class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    categoria = db.Column(db.String(20), nullable=False, unique=True)
+    category = db.Column(db.String(20), nullable=False, unique=True)
 
 class Logs(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -62,7 +62,7 @@ class Logs(db.Model):
 
 User_pydantic = sqlalchemy_to_pydantic(User)
 Pesquisa_pydantic = sqlalchemy_to_pydantic(Pesquisa)
-Categoria_pydantic = sqlalchemy_to_pydantic(Categoria)
+Category_pydantic = sqlalchemy_to_pydantic(Category)
 Logs_pydantic = sqlalchemy_to_pydantic(Logs)
 
 
@@ -97,12 +97,12 @@ class Pesquisas(BaseModel):
 class RequestPesquisa(BaseModel):
     pesquisa: str
 
-class Categorias(BaseModel):
-    categoria: list[Categoria_pydantic]
+class Categories(BaseModel):
+    categories: list[Category_pydantic]
     count: int
 
-class RequestCategoria(BaseModel):
-    categoria: str
+class RequestCategory(BaseModel):
+    category: str
 
 
 migrate = Migrate(app, db)
@@ -211,8 +211,7 @@ def deleta_pessoa(id):
 
 
 @app.get('/logs')
-@spec.validate(resp=Response(HTTP_200=Logss))
-# @spec.validate(query=QueryUser)
+# @spec.validate(resp=Response(HTTP_200=Logss))
 def find_logs():
     '''Return logs list'''
     # query = request.context.query
@@ -259,24 +258,24 @@ def insert_pesquisa():
         return {'message': 'Pesquisa already in use'}, 404
     return jsonify(Pesquisa_pydantic(**new_data.__dict__).dict()), 201
 
-@app.get('/categorias')
-@spec.validate(resp=Response(HTTP_200=Categorias))
-def find_gategorias():
-    '''Return a list of categorias'''
-    categorias = Categoria.query.all()
+@app.get('/categories')
+@spec.validate(resp=Response(HTTP_200=Categories))
+def find_gategories():
+    '''Return a list of categories'''
+    categories = Category.query.all()
     return jsonify(
-            Categorias(
-                categoria= categorias,
-                count= len(categorias)
+            Categories(
+                categories= categories,
+                count= len(categories)
             ).dict()
     ) , 200
 
-@app.post('/categoria')
-@spec.validate(body=Request(RequestCategoria), resp=Response(HTTP_200=Categoria_pydantic))
-def insert_categoria():
-    '''Insert a new categoria on database'''
-    categoria = request.context.body.dict(exclude_none=True)
-    new_data = add_in_db(Categoria, categoria)
+@app.post('/category')
+@spec.validate(body=Request(RequestCategory), resp=Response(HTTP_200=Category_pydantic))
+def insert_category():
+    '''Insert a new category on database'''
+    category = request.context.body.dict(exclude_none=True)
+    new_data = add_in_db(Category, category)
     if not new_data:
-        return {'message': 'Categoria already in use'}, 404
-    return jsonify(Categoria_pydantic(**new_data.__dict__).dict()), 201
+        return {'message': 'Category already in use'}, 404
+    return jsonify(Category_pydantic(**new_data.__dict__).dict()), 201
