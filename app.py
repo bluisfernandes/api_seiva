@@ -151,7 +151,6 @@ def add_in_db(table, dict):
         return user
     except IntegrityError as e:
         db.session.rollback()
-        print(f"ERROR! {e}")
         return False
 
 def update_in_db(table, id, dict):
@@ -256,6 +255,8 @@ def insert_pesquisa():
     '''Insert a new log on database'''
     pesquisa = request.context.body.dict(exclude_none=True)
     new_data = add_in_db(Pesquisa, pesquisa)
+    if not new_data:
+        return {'message': 'Pesquisa already in use'}, 404
     return jsonify(Pesquisa_pydantic(**new_data.__dict__).dict()), 201
 
 @app.get('/categorias')
@@ -276,4 +277,6 @@ def insert_categoria():
     '''Insert a new categoria on database'''
     categoria = request.context.body.dict(exclude_none=True)
     new_data = add_in_db(Categoria, categoria)
+    if not new_data:
+        return {'message': 'Categoria already in use'}, 404
     return jsonify(Categoria_pydantic(**new_data.__dict__).dict()), 201
