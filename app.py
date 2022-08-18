@@ -1,4 +1,3 @@
-from logging import exception
 from flask import Flask, jsonify, request, url_for
 from flask_pydantic_spec import FlaskPydanticSpec, Response, Request
 from pydantic_sqlalchemy import sqlalchemy_to_pydantic
@@ -149,7 +148,7 @@ def add_in_db(table, dict):
         # to appear all features in __dict__:
         user.id
         return user
-    except IntegrityError as e:
+    except IntegrityError:
         db.session.rollback()
         return False
 
@@ -279,3 +278,19 @@ def insert_category():
     if not new_data:
         return {'message': 'Category already in use'}, 404
     return jsonify(Category_pydantic(**new_data.__dict__).dict()), 201
+
+
+def apology(name, code):
+    return {"message":name,"code":code}, code
+
+
+def errorhandler(e):
+    '''Handle error'''
+    if not isinstance(e, HTTPException):
+        e = InternalServerError()
+    return apology(e.name, e.code)
+ 
+
+ # Listen for errors
+for code in default_exceptions:
+    app.errorhandler(code)(errorhandler)
