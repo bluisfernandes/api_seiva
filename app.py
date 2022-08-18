@@ -164,7 +164,7 @@ def update_in_db(table, id, dict):
 
 def delete_in_db(table, id):
     user = table.query.filter_by(id=id).first()
-    create_log(table, user.id, f'deleted from db: {table.__tablename__} id:{id}')
+    create_log(table, user.id, f'deleted from db: {table.__tablename__} id={id}')
     db.session.delete(user)
     db.session.commit()
 
