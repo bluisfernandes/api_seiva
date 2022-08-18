@@ -45,9 +45,9 @@ class User(db.Model):
     group = db.Column(db.String(10), nullable=False, default='user')
     email = db.Column(db.String(40), nullable=False)
 
-class Pesquisa(db.Model):
+class Search(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    pesquisa = db.Column(db.String(40), nullable=False, unique=True)
+    search = db.Column(db.String(40), nullable=False, unique=True)
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -61,7 +61,7 @@ class Logs(db.Model):
     id_ref = db.Column(db.Integer, nullable=True)
 
 User_pydantic = sqlalchemy_to_pydantic(User)
-Pesquisa_pydantic = sqlalchemy_to_pydantic(Pesquisa)
+Search_pydantic = sqlalchemy_to_pydantic(Search)
 Category_pydantic = sqlalchemy_to_pydantic(Category)
 Logs_pydantic = sqlalchemy_to_pydantic(Logs)
 
@@ -90,12 +90,12 @@ class Logss(BaseModel):
     logs: list[Logs_pydantic]
     count: int
 
-class Pesquisas(BaseModel):
-    pesquisa: list[Pesquisa_pydantic]
+class Searchs(BaseModel):
+    searchs: list[Search_pydantic]
     count: int
 
-class RequestPesquisa(BaseModel):
-    pesquisa: str
+class RequestSearch(BaseModel):
+    search: str
 
 class Categories(BaseModel):
     categories: list[Category_pydantic]
@@ -236,27 +236,27 @@ def insert_log():
     return jsonify(Logs_pydantic(**log.__dict__).dict()), 201
 
 
-@app.get('/pesquisas')
-@spec.validate(resp=Response(HTTP_200=Pesquisas))
-def find_pesquisas():
-    '''Return a list os pesquisas'''
-    pesquisas = Pesquisa.query.all()
+@app.get('/search')
+@spec.validate(resp=Response(HTTP_200=Searchs))
+def find_searchs():
+    '''Return a list of searchs'''
+    searchs = Search.query.all()
     return jsonify(
-            Pesquisas(
-                pesquisa= pesquisas,
-                count= len(pesquisas)
+            Searchs(
+                searchs= searchs,
+                count= len(searchs)
             ).dict()
     ) , 200
 
-@app.post('/pesquisa')
-@spec.validate(body=Request(RequestPesquisa), resp=Response(HTTP_200=Pesquisa_pydantic))
-def insert_pesquisa():
-    '''Insert a new log on database'''
-    pesquisa = request.context.body.dict(exclude_none=True)
-    new_data = add_in_db(Pesquisa, pesquisa)
+@app.post('/search')
+@spec.validate(body=Request(RequestSearch), resp=Response(HTTP_200=Search_pydantic))
+def insert_search():
+    '''Insert a new search on database'''
+    search = request.context.body.dict(exclude_none=True)
+    new_data = add_in_db(Search, search)
     if not new_data:
-        return {'message': 'Pesquisa already in use'}, 404
-    return jsonify(Pesquisa_pydantic(**new_data.__dict__).dict()), 201
+        return {'message': 'Search already in use'}, 404
+    return jsonify(Search_pydantic(**new_data.__dict__).dict()), 201
 
 @app.get('/categories')
 @spec.validate(resp=Response(HTTP_200=Categories))
