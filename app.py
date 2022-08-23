@@ -131,7 +131,7 @@ def find_users():
 
 @app.get('/user/<int:id>')
 # @spec.validate(resp=Response(HTTP_200=UserResponse))
-def busca_pessoa(id):
+def find_user(id):
     '''Return user by given id'''
     user = User.query.filter_by(id = id).first()
     if not user:
@@ -200,7 +200,7 @@ def update_user(id):
 
 @app.delete('/user/<int:id>')
 @spec.validate(resp=Response('HTTP_204'))
-def deleta_pessoa(id):
+def delete_user(id):
     '''Delete user by id.'''
     user = User.query.filter_by(id=id).first()
     if not user:
