@@ -279,6 +279,15 @@ def insert_category():
         return {'message': 'Category already in use'}, 404
     return jsonify(Category_pydantic(**new_data.__dict__).dict()), 201
 
+@app.delete('/category/<int:id>')
+@spec.validate(resp=Response('HTTP_204'))
+def delete_category(id):
+    '''Delete Category by id.'''
+    categ = Category.query.filter_by(id=id).first()
+    if not categ:
+        return {'message': 'Category not found'}, 404
+    delete_in_db(Category, id)
+    return jsonify({})
 
 def apology(name, code):
     return {"message":name,"code":code}, code
