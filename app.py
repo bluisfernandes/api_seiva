@@ -257,6 +257,18 @@ def insert_search():
         return {'message': 'Search already in use'}, 404
     return jsonify(Search_pydantic(**new_data.__dict__).dict()), 201
 
+
+@app.delete('/search/<int:id>')
+@spec.validate(resp=Response('HTTP_204'))
+def delete_search(id):
+    '''Delete Category by id.'''
+    search = Search.query.filter_by(id=id).first()
+    if not search:
+        return {'message': 'Search not found'}, 404
+    delete_in_db(Search, id)
+    return jsonify({})
+
+
 @app.get('/categories')
 @spec.validate(resp=Response(HTTP_200=Categories))
 def find_gategories():
