@@ -269,7 +269,7 @@ def delete_search(id):
     return jsonify({})
 
 
-@app.get('/categories')
+@app.get('/category')
 @spec.validate(resp=Response(HTTP_200=Categories))
 def find_gategories():
     '''Return a list of categories'''
