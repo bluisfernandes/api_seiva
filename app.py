@@ -79,7 +79,8 @@ class NewUser(BaseModel):
 
 class UserResponse(User_pydantic):
     class Config:
-        fields = {'password': {'exclude': True}}
+        # fields = {'password': {'exclude': True}}
+        pass
 
 class Users(BaseModel):
     users: list[UserResponse]
