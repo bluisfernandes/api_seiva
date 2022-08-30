@@ -12,6 +12,7 @@ Flask-Migrate==3.1.0
 flask-pydantic-spec==0.3.1
 Flask-SQLAlchemy==2.5.1
 greenlet==1.1.2
+gunicorn==20.1.0
 httpie==3.2.1
 idna==3.3
 inflection==0.5.1
@@ -21,6 +22,7 @@ Mako==1.2.1
 MarkupSafe==2.1.1
 multidict==6.0.2
 nested-lookup==0.2.25
+psycopg2==2.9.3
 pycparser==2.21
 pydantic==1.9.1
 pydantic-sqlalchemy==0.0.9
