@@ -15,6 +15,9 @@ from dotenv import load_dotenv
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 
 from typing import Optional
+import pymongo
+import bson.json_util as json_util
+import json
 
 
 load_dotenv()
@@ -35,6 +38,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+
+# Initialize mongo variables
+mongodb_uri = os.getenv('MONGODB_URI')
+mongodb_db = os.getenv('MONGODB_DB')
+collection_log = os.getenv('MONGODB_COLLECTION_LOGS')
 
 
 class User(db.Model):
@@ -311,9 +319,39 @@ def errorhandler(e):
     if not isinstance(e, HTTPException):
         e = InternalServerError()
     return apology(e.name, e.code)
+
+@app.get('/mongo/log')
+@app.get('/mongo/log/<int:q>')
+def find_mongo_log(q = 1000):
+    '''Return mongo logs'''
+    client = pymongo.MongoClient(mongodb_uri)
+    db = client[mongodb_db]
+    col = db[collection_log]
+
+    result = col.find().sort('start_time', pymongo.DESCENDING)
+
+    results=dict()
+    for i in range(q):
+        if result.alive:
+            log = result.next()
+            item = json.loads(json_util.dumps(log))
+            # line = json.loads((item))
+            results[i]=item
+            # results[line["start_time"]["$date"]]=line
+    return results
  
 
- # Listen for errors
+@app.get('/mongo/log/count')
+def count_mongo_log():
+    client = pymongo.MongoClient(mongodb_uri)
+    db = client[mongodb_db]
+    col = db[collection_log]
+
+    count = col.count_documents({})
+    return {"count": count}
+
+
+# Listen for errors
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
 
