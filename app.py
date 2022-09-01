@@ -315,8 +315,8 @@ def apology(name, code):
     return {"message":name,"code":code}, code
 
 
-@app.get('/mongo/log')
-@app.get('/mongo/log/<int:q>')
+@app.get('/mongo/logs')
+@app.get('/mongo/logs/<int:q>')
 def find_mongo_log(q = 1000):
     '''Return mongo logs'''
     client = pymongo.MongoClient(mongodb_uri)
@@ -325,18 +325,16 @@ def find_mongo_log(q = 1000):
 
     result = col.find().sort('start_time', pymongo.DESCENDING)
 
-    results=dict()
-    for i in range(q):
+    results=list()
+    for _ in range(q):
         if result.alive:
             log = result.next()
             item = json.loads(json_util.dumps(log))
-            # line = json.loads((item))
-            results[i]=item
-            # results[line["start_time"]["$date"]]=line
-    return results
+            results.append(item)
+    return jsonify(logs=results, count=len(results))
  
 
-@app.get('/mongo/log/count')
+@app.get('/mongo/logs/count')
 def count_mongo_log():
     client = pymongo.MongoClient(mongodb_uri)
     db = client[mongodb_db]
