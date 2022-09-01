@@ -78,6 +78,7 @@ class QueryUser(BaseModel):
     username: Optional[str]
     group: Optional[str]
     email: Optional[str]
+    password: Optional[str]
 
 class NewUser(BaseModel):
     username: str
