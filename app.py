@@ -315,12 +315,6 @@ def apology(name, code):
     return {"message":name,"code":code}, code
 
 
-def errorhandler(e):
-    '''Handle error'''
-    if not isinstance(e, HTTPException):
-        e = InternalServerError()
-    return apology(e.name, e.code)
-
 @app.get('/mongo/log')
 @app.get('/mongo/log/<int:q>')
 def find_mongo_log(q = 1000):
@@ -350,6 +344,13 @@ def count_mongo_log():
 
     count = col.count_documents({})
     return {"count": count}
+
+
+def errorhandler(e):
+    '''Handle error'''
+    if not isinstance(e, HTTPException):
+        e = InternalServerError()
+    return apology(e.name, e.code)
 
 
 # Listen for errors
